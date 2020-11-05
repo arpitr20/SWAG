@@ -149,7 +149,7 @@ print(tiles_data['avg income'])
 tiles_data.to_csv('tiles_data.csv',index=True)  # save to csv files to make our lives a lot easier
 
 """# Implementing CNN's:
-Initialize training and testing dataset (example below)
+Initialize training and testing dataset
 """
 
 tiles_data = pd.read_csv("tiles_data.csv", sep=',')
@@ -212,7 +212,7 @@ print(test_indices)
 """
 
 train_indices=[]
-test_indices=[] #we will train on all the data we can, now - to do the best on test as possible.
+#test_indices=[] we will train on all the data we can, now - to do the best on test as possible.
 for i in range(0, length):
     train_indices.append(i)
 
@@ -227,118 +227,9 @@ image, label = dset1[i]
 image = np.moveaxis(image.numpy(), 0, -1)
 image = (image * 255).astype(np.uint8) # to preview, needs to be ints
 display(Image.fromarray(image).convert("RGB"))
-
-### Defining convolutional neural network:
-
-Example architecture below
--  10 channels of 5x5 convolutions
--  Max pool with stride 2 and 2x2 kernels
--  20 channels of 5x5 convolutions
--  Max pool with stride 2 and 2x2 kernels
--  Fully connected (linear) layer with 50 outputs
--  Fully connected (linear) layer
-
-Convolutional layers may be created with nn.Conv2d(in_channels, out_channels, kernel_size). Pooling layers are available as F.max_pool2d(kernel_size, stride).
-
-
-We need to figure out  the size of the image after the last max pool layer in order to convert it to pass into the linear layer, which expects a tensor of shape (batch_size, flattened_image_length). 
--  Use x.view(new dimensions) to reshape a tensor into new dimensions 
-(example: if x is of shape (4, 3, 3) and you want to change it to be (4, 9), you can do x.view(-1, 9).)
 """
 
-class ConvolutionalNeuralNet(nn.Module):
-  def __init__(self):
-    super(ConvolutionalNeuralNet, self).__init__()
-    self.dropout = torch.nn.Dropout(p=0.3)
-    self.conv1 = nn.Conv2d(3, 64, 3, stride = 4, padding = 1) 
-    self.pool1 = nn.MaxPool2d(2, 2)
-    self.conv2 = nn.Conv2d(64, 128, 7, stride = 2, padding = 3)
-    self.pool2 = nn.MaxPool2d(2, 2)
-    self.conv3 = nn.Conv2d(128, 256, 5, stride = 1, padding = 2) 
-    self.pool3 = nn.MaxPool2d(2, 2)
-    self.conv4 = nn.Conv2d(256, 512, 5, stride = 1, padding = 2) 
-    self.pool4 = nn.MaxPool2d(2, 2)
-    self.conv5 = nn.Conv2d(512, 1024, 5, stride = 1, padding = 2) 
-    self.pool5 = nn.MaxPool2d(2, 2)
-    #self.conv6 = nn.Conv2d(1024, 2048, 7, stride = 2, padding = 3) 
-    #self.pool6 = nn.MaxPool2d(2, 2)
-    #self.conv7 = nn.Conv2d(2048, 4096, 7, stride = 2, padding = 3) 
-    #self.pool7 = nn.MaxPool2d(2, 2)
-    #self.conv8 = nn.Conv2d(4096, 8192, 7, stride = 2, padding = 3) 
-    #self.pool8 = nn.MaxPool2d(2, 2)
-    self.fc1 = nn.Linear(1024 * 1 * 1, 2000)
-    self.fc2 = nn.Linear(2000, 1)
-  
-  def forward(self, x):
-    x = F.relu(self.conv1(x))
-    x = self.dropout(x)
-    x = self.pool1(x)
-    x = F.relu(self.conv2(x))
-    x = self.dropout(x)
-    x = self.pool2(x)
-    x = F.relu(self.conv3(x))
-    x = self.dropout(x)
-    x = self.pool3(x)
-    x = F.relu(self.conv4(x))
-    x = self.dropout(x)
-    x = self.pool4(x)
-    x = F.relu(self.conv5(x))
-    x = self.dropout(x)
-    x = self.pool5(x)
-    x = x.view(-1, 1024 * 1 * 1) 
-    x = self.fc1(x)
-    x = self.fc2(x)
-    return x
-
-"""### Train model:
-
-Example below uses Adam optimizer with learning rate .001. It also prints  loss every 100 minibatches, as well as overall loss for every epoch. 
-
-We also use cross entropy loss instead of binary cross entropy loss because we are working with multiple classes. 
-We also should be using the dataloader to train in minibatches inside of each epoch.
-"""
-
-cnn_model = ConvolutionalNeuralNet().to(device=device)
-criterion = torch.nn.L1Loss()
-optimizer = torch.optim.Adam(cnn_model.parameters(), lr = 0.004, weight_decay = 0.05) 
-
-cont = 0
-min_loss = 10000000
-patience = 0
-for epoch in range(100):
-    epoch_loss = 0
-    for batch_idx, (images, labels) in enumerate(train_loader):
-        # Load the images and labels on the GPU
-        images = images.to(device=device)
-        labels = labels.to(device=device)
-        
-        optimizer.zero_grad()                 # resets the information from last time
-        pred_labels = cnn_model(images).squeeze()       # calculates the predictions
-        pred_labels = torch.clamp(pred_labels, 0)
-        loss = criterion(pred_labels, labels)
-        
-        loss.backward()                       # gradient descent, part 1
-        torch.nn.utils.clip_grad_norm(cnn_model.parameters(), 10)  # gradient clipping(linear reg can have infinite gradients)
-        optimizer.step()                      # gradient descent, part 2
-
-        epoch_loss += loss.item() / labels.shape[0]
-
-        #if batch_idx % 1 == 0:
-            #print(f"Epoch {epoch}, batch {batch_idx}: {loss}")
-    print(f"Epoch {epoch}: {epoch_loss}")
-    if epoch_loss < min_loss:
-        torch.save(cnn_model, 'best_model')
-        patience = 0
-        min_loss = epoch_loss
-        print(min_loss)
-    else:
-        patience += 1
-        print(patience)
-    if (patience > 14):
-        print()
-        break;
-    
-cnn_model = torch.load('best_model')
+#INSERT CNN CLASS AND MODEL CODE HERE!!!!!
 
 """Check accuracy on test dataset:
 
